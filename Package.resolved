@@ -1,0 +1,15 @@
+{
+  "originHash" : "e3236965f2ede8b24a30f4dcd78df44a8568280676eb24011d3d182af5348344",
+  "pins" : [
+    {
+      "identity" : "swifthex",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/HALQME/SwiftHex",
+      "state" : {
+        "branch" : "main",
+        "revision" : "00fdc5dcb134f88e615fae1df96f113d4cdbe001"
+      }
+    }
+  ],
+  "version" : 3
+}
