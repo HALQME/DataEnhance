@@ -5,52 +5,56 @@
 //  Created by HALQME on 2024/09/19.
 //
 import Foundation
-import SwiftHex
 
 extension Array where Element == UInt8 {
-    init(reserve: Int) {
-        self = Array<UInt8>()
-        self.reserveCapacity(reserve)
+    private static let hexDigits: [UInt8] = [
+        0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 0, 0, 0, 0, 0, 0, 0,
+        10, 11, 12, 13, 14, 15, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+        0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+        10, 11, 12, 13, 14, 15
+    ]
+
+    init(reserveCapacity: Int) {
+        self = Array<Element>()
+        self.reserveCapacity(reserveCapacity)
     }
 
-    public init(hex: Hex) {
-        let hexString = hex.description
-        self.init(reserve: (hexString.count + 1) / 2)
-
-        let hexDigits: [Character: UInt8] = [
-            "0": 0, "1": 1, "2": 2, "3": 3, "4": 4, "5": 5, "6": 6, "7": 7, "8": 8, "9": 9,
-            "A": 10, "B": 11, "C": 12, "D": 13, "E": 14, "F": 15,
-            "a": 10, "b": 11, "c": 12, "d": 13, "e": 14, "f": 15,
-        ]
-
+    public init?(hex: String) {
+        self.init(reserveCapacity: hex.count / 2)
         var buffer: UInt8?
-
-        for char in hexString {
-            guard let value = hexDigits[char] else {
-                removeAll()
-                return
+        var skip = hex.hasPrefix("0x") ? 2 : 0
+        for char in hex.unicodeScalars.lazy {
+            guard skip == 0 else {
+                skip -= 1
+                continue
             }
-
+            
+            guard char.value >= 48 && char.value <= 102 else {
+                return nil
+            }
+            
+            let v = Array.hexDigits[Int(char.value - 48)]
+            
             if let b = buffer {
-                append(b << 4 | value)
+                append(b << 4 | v)
                 buffer = nil
             } else {
-                buffer = value
+                buffer = v
             }
         }
-
+        
         if let b = buffer {
             append(b)
         }
     }
 
     public func toHexString() -> String {
-        `lazy`.reduce(into: "") {
-            var s = String($1, radix: 16)
-            if s.count == 1 {
-                s = "0" + s
-            }
-            $0 += s
+        let hexDigits = ["0", "1", "2", "3", "4", "5", "6", "7", "8", "9", "a", "b", "c", "d", "e", "f"]
+        var result = String(repeating: "0", count: self.count * 2)
+        for byte in self {
+            result += hexDigits[Int(byte >> 4)]
+            result += hexDigits[Int(byte & 0xF)]
         }
+        return result
     }
 }
